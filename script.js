@@ -124,3 +124,37 @@ function closeModal() {
         form.style.display = ""; 
     }
 }
+
+// --- 5. HACK PARA MÓVILES: SWIPE VERTICAL -> SCROLL HORIZONTAL ---
+let touchStartY = 0;
+let touchStartX = 0;
+
+stickyContainer.addEventListener('touchstart', (e) => {
+    touchStartY = e.touches[0].clientY;
+    touchStartX = e.touches[0].clientX;
+}, { passive: true });
+
+stickyContainer.addEventListener('touchmove', (e) => {
+    if (!touchStartY || !touchStartX) return;
+
+    const touchEndY = e.touches[0].clientY;
+    const touchEndX = e.touches[0].clientX;
+
+    const diffY = touchStartY - touchEndY; // Cuánto movió el dedo verticalmente
+    const diffX = touchStartX - touchEndX; // Cuánto movió el dedo horizontalmente
+
+    // Si el movimiento es mayormente VERTICAL (el usuario quiere bajar/subir)
+    // y es más significativo que el movimiento horizontal...
+    if (Math.abs(diffY) > Math.abs(diffX) && Math.abs(diffY) > 5) {
+        
+        // Movemos el scroll horizontalmente usando la diferencia vertical
+        // Multiplicamos por 1.5 para que se sienta ágil
+        stickyContainer.scrollLeft += diffY * 1.5;
+        
+        // Prevenir el comportamiento nativo (evitar recargar página o rebotes raros)
+        if (e.cancelable) e.preventDefault();
+        
+        // Actualizamos la posición de inicio para que el movimiento sea continuo
+        touchStartY = touchEndY;
+    }
+}, { passive: false });
