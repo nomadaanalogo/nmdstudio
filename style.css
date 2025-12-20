@@ -97,6 +97,7 @@ h1 {
     background: var(--neon-gradient); -webkit-background-clip: text;
     -webkit-text-fill-color: transparent; opacity: 0.1; 
     transition: transform 1s ease, opacity 1s ease;
+    pointer-events: none;
 }
 
 /* --- ESTADOS ACTIVOS (ANIMACIONES) --- */
@@ -145,6 +146,7 @@ input:focus { outline: none; border-bottom: 1px solid #f441a5; }
     background: #fff; color: #000; font-weight: 900;
     text-transform: uppercase; letter-spacing: 1px; cursor: pointer;
     margin-top: 1rem; transition: transform 0.2s, box-shadow 0.3s;
+    z-index: 10;
 }
 .btn-submit:hover, #mobile-btn:hover {
     transform: translateY(-2px);

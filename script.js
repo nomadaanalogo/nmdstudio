@@ -3,26 +3,33 @@ const sections = document.querySelectorAll(".card");
 const progressBar = document.getElementById("progress-bar");
 const GOOGLE_URL = "https://script.google.com/macros/s/AKfycbx_ksRnCz0bpcrNNt_SET0ONCMvhDoUAEh5oeDED0-NCrxLOf96gk3adlupfPPywLXQ/exec"; 
 
-// CONFIGURACIÓN
-let isThrottled = false; // Semáforo para evitar spam de scroll
-const THROTTLE_DELAY = 700; // Milisegundos de espera entre slides (Ajustar a gusto)
+// --- VARIABLES DE CONTROL ---
+let currentIndex = 0;           
+let isLocked = false;           // Semáforo de bloqueo
+const COOLDOWN_MS = 1000;       // Tiempo de silencio obligatorio tras cambiar slide
 
-// --- 1. SINCRONIZACIÓN DE UI (Barra y Clases Activas) ---
+// VARIABLES EXCLUSIVAS PARA PC (El "Cubo")
+let wheelAccumulator = 0;       // Aquí acumulamos la intención de scroll
+const WHEEL_THRESHOLD = 80;     // Cuánto hay que scrollear para que la página reaccione (Ajustable)
+let accumulatorResetTimer = null; // Para limpiar el acumulador si el usuario se detiene
+
+// --- 1. SINCRONIZACIÓN VISUAL (Barra y Clases) ---
 const updateUI = () => {
-    const scrollLeft = scroller.scrollLeft;
-    const maxScroll = scroller.scrollWidth - scroller.clientWidth;
-    const width = window.innerWidth;
-    
-    // Calcular índice actual (Redondeado)
-    const currentIndex = Math.round(scrollLeft / width);
-    
-    // Barra de progreso
-    if (maxScroll > 0) {
-        const progress = (scrollLeft / maxScroll) * 100;
-        progressBar.style.width = `${progress}%`;
+    // Si estamos en animación controlada (bloqueados), NO actualizamos el índice
+    // leyendo el DOM. Confiamos en nuestra variable 'currentIndex'.
+    // Esto evita que si scrolleas rápido mientras se mueve, calcule mal la posición.
+    if (!isLocked) {
+        currentIndex = Math.round(scroller.scrollLeft / window.innerWidth);
     }
 
-    // Clases Activas (Para animaciones CSS)
+    // Barra de progreso
+    const maxScroll = scroller.scrollWidth - scroller.clientWidth;
+    if (maxScroll > 0) {
+        const progress = (scroller.scrollLeft / maxScroll) * 100;
+        if(progressBar) progressBar.style.width = `${progress}%`;
+    }
+
+    // Clases Activas
     sections.forEach((sec, index) => {
         if(index === currentIndex) {
             sec.classList.add("active-section");
@@ -32,65 +39,83 @@ const updateUI = () => {
     });
 };
 
-// Escuchar evento de scroll nativo (optimizado)
-scroller.addEventListener("scroll", () => {
-    // Usamos requestAnimationFrame para rendimiento
-    window.requestAnimationFrame(updateUI);
-});
+scroller.addEventListener("scroll", () => window.requestAnimationFrame(updateUI));
 
-// Inicializar UI
-updateUI();
+// --- 2. FUNCIÓN DE MOVIMIENTO ---
+function goToSection(index) {
+    // Validar límites
+    if (index < 0 || index >= sections.length) return;
 
+    isLocked = true;   // 1. Bloqueamos inputs
+    currentIndex = index; 
 
-// --- 2. LÓGICA DE DESKTOP (RUEDA DEL MOUSE - SCROLL Y -> X) ---
-scroller.addEventListener("wheel", (evt) => {
-    // Si el modal está abierto, permitimos scroll normal dentro del modal o ignoramos
-    const modal = document.getElementById("modal");
-    if(modal && modal.style.display === "flex") return;
-
-    // Si es un trackpad moviéndose horizontalmente, dejamos que el navegador actúe nativamente
-    if (Math.abs(evt.deltaX) > Math.abs(evt.deltaY)) return;
-
-    // Prevenimos el scroll vertical predeterminado
-    evt.preventDefault();
-
-    if (isThrottled) return; // Si estamos en tiempo de espera, ignoramos
-
-    const direction = evt.deltaY > 0 ? 1 : -1; // 1 = Bajar/Derecha, -1 = Subir/Izquierda
-    const width = window.innerWidth;
-    const currentScroll = scroller.scrollLeft;
-    
-    // Calculamos el siguiente punto de snap
-    const nextScroll = currentScroll + (direction * width);
-
+    // Mover pantalla
     scroller.scrollTo({
-        left: nextScroll,
+        left: window.innerWidth * index,
         behavior: "smooth"
     });
 
-    // Activamos el semáforo
-    isThrottled = true;
+    // 2. Reiniciar acumuladores de PC para que no salte de nuevo por inercia
+    wheelAccumulator = 0;
+
+    // 3. Desbloquear después de que termine la animación
     setTimeout(() => {
-        isThrottled = false;
-    }, THROTTLE_DELAY);
+        isLocked = false;
+    }, COOLDOWN_MS);
+}
 
-}, { passive: false }); // 'passive: false' es vital para poder usar preventDefault
+
+// --- 3. LÓGICA PC (SOLUCIÓN DEFINITIVA DE SALTOS) ---
+window.addEventListener("wheel", (evt) => {
+    const modal = document.getElementById("modal");
+    if(modal && modal.style.display === "flex") return;
+
+    // A. Si es scroll horizontal nativo (Trackpad izquierda/derecha), DEJAR PASAR.
+    if (Math.abs(evt.deltaX) > Math.abs(evt.deltaY)) return;
+
+    // B. Si es vertical, tomamos el control.
+    evt.preventDefault(); 
+
+    // C. Si estamos bloqueados (animando), ignoramos la inercia del mouse.
+    if (isLocked) return;
+
+    // D. ACUMULADOR (EL FIX):
+    // En lugar de movernos al detectar '1' de movimiento, sumamos el valor.
+    wheelAccumulator += evt.deltaY;
+
+    // Si el usuario deja de scrollear por 200ms, reiniciamos el acumulador a 0.
+    // Esto evita que scrolles un poquito ahora y un poquito en 10 segundos y salte solo.
+    clearTimeout(accumulatorResetTimer);
+    accumulatorResetTimer = setTimeout(() => {
+        wheelAccumulator = 0;
+    }, 200);
+
+    // E. DISPARADOR
+    // Solo si el acumulador supera el UMBRAL (80), nos movemos.
+    // Esto filtra vibraciones y toques accidentales.
+    if (wheelAccumulator > WHEEL_THRESHOLD) {
+        // Rueda Abajo -> Siguiente
+        goToSection(currentIndex + 1);
+    } else if (wheelAccumulator < -WHEEL_THRESHOLD) {
+        // Rueda Arriba -> Anterior
+        goToSection(currentIndex - 1);
+    }
+
+}, { passive: false });
 
 
-// --- 3. LÓGICA MÓVIL (GESTOS TÁCTILES) ---
-// El CSS 'scroll-snap' maneja el swipe horizontal perfectamente.
-// Solo agregamos soporte para SWIPE VERTICAL -> CAMBIO HORIZONTAL (tu requerimiento)
-
+// --- 4. LÓGICA MÓVIL (TOUCH - SIN CAMBIOS, PERFECTA) ---
 let touchStartY = 0;
 let touchStartX = 0;
 
 scroller.addEventListener('touchstart', (e) => {
+    if(isLocked) return;
     touchStartY = e.touches[0].clientY;
     touchStartX = e.touches[0].clientX;
 }, { passive: true });
 
 scroller.addEventListener('touchmove', (e) => {
-    if(isThrottled) return;
+    if (isLocked) return;
 
     const touchEndY = e.touches[0].clientY;
     const touchEndX = e.touches[0].clientX;
@@ -98,86 +123,76 @@ scroller.addEventListener('touchmove', (e) => {
     const diffY = touchStartY - touchEndY;
     const diffX = touchStartX - touchEndX;
 
-    // Si el movimiento es mayormente VERTICAL y significativo (>50px)
+    // Detección de Swipe Vertical estricto
     if (Math.abs(diffY) > Math.abs(diffX) && Math.abs(diffY) > 50) {
-        
-        // Bloqueamos scroll vertical nativo
         if (e.cancelable) e.preventDefault();
-
-        const width = window.innerWidth;
-        const currentScroll = scroller.scrollLeft;
-
-        // diffY > 0 significa dedo hacia arriba (queremos ir al siguiente)
-        const direction = diffY > 0 ? 1 : -1;
         
-        scroller.scrollTo({
-            left: currentScroll + (direction * width),
-            behavior: "smooth"
-        });
-
-        isThrottled = true;
-        setTimeout(() => isThrottled = false, THROTTLE_DELAY);
+        touchStartY = touchEndY; // Resetear ancla
+        
+        if (diffY > 0) {
+            goToSection(currentIndex + 1);
+        } else {
+            goToSection(currentIndex - 1);
+        }
     }
 }, { passive: false });
 
+// --- 5. RESIZE ---
+window.addEventListener('resize', () => {
+    scroller.scrollTo({
+        left: window.innerWidth * currentIndex,
+        behavior: "auto"
+    });
+});
 
-// --- 4. FORMULARIO Y MODAL (Mantenido y adaptado) ---
+// --- 6. FORMULARIOS (Igual que antes) ---
 const mainForm = document.getElementById("mainForm");
+if(mainForm) {
+    mainForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const btn = e.target.querySelector("button");
+        const originalText = btn.innerHTML;
+        btn.innerHTML = 'ENVIANDO...';
+        btn.disabled = true;
 
-const formHandler = async (e) => {
-    e.preventDefault();
-    const btn = e.target.querySelector("button");
-    const originalText = btn.innerHTML;
-    
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ENVIANDO...';
-    btn.disabled = true;
+        const fd = new FormData(e.target);
+        const data = Object.fromEntries(fd);
 
-    const fd = new FormData(e.target);
-    const data = Object.fromEntries(fd);
+        fetch(GOOGLE_URL, { 
+            method: "POST", mode: "no-cors", 
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data) 
+        }).catch(console.error);
 
-    // Envío a Google Sheets (sin esperar respuesta para UX rápida)
-    fetch(GOOGLE_URL, { 
-        method: "POST", 
-        mode: "no-cors", 
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data) 
-    }).catch(err => console.error(err));
+        const msg = `Hola! Me interesa la promo Landing Page.%0A*Nombre:* ${data.name}`;
+        setTimeout(() => {
+            window.open(`https://wa.me/573154483584?text=${msg}`, "_blank");
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+            e.target.reset();
+            closeModal();
+        }, 1000);
+    });
+}
 
-    // Redirección WhatsApp
-    const msg = `Hola! Me interesa la promo Landing Page.%0A*Nombre:* ${data.name}%0A*Email:* ${data.email}`;
-    
-    setTimeout(() => {
-        window.open(`https://wa.me/573154483584?text=${msg}`, "_blank");
-        btn.innerHTML = originalText;
-        btn.disabled = false;
-        e.target.reset();
-        closeModal();
-    }, 1500);
-};
-
-if(mainForm) mainForm.addEventListener("submit", formHandler);
-
-// Funciones globales para HTML onclick
 window.openModal = function() {
     const modal = document.getElementById("modal");
-    const modalContent = document.getElementById("modal-content");
+    const content = document.getElementById("modal-content");
     const form = document.getElementById("mainForm");
-    
-    if(modal && form) {
-        modal.style.display = "flex";
-        modalContent.appendChild(form); // Movemos el form al modal
-    }
+    if(modal && form) { modal.style.display = "flex"; content.appendChild(form); }
 }
 
 window.closeModal = function() {
     const modal = document.getElementById("modal");
     const form = document.getElementById("mainForm");
     const desktopContainer = document.querySelector(".cta-form-container");
-    
     if(modal) modal.style.display = "none";
-    
-    // Devolvemos el form a desktop si existe el contenedor (responsive switch)
-    if(desktopContainer && form) {
-        desktopContainer.appendChild(form);
-    }
+    if(desktopContainer && form) desktopContainer.appendChild(form);
 }
+
+// Forzar actualización al cargar por si el navegador se duerme
+window.addEventListener('load', () => {
+    updateUI();
+    // Un segundo chequeo por si las imágenes cambian el tamaño
+    setTimeout(updateUI, 100);
+});
