@@ -1,9 +1,7 @@
 :root {
-    --bg-body: #020202;       /* Negro casi puro */
-    --text-main: #ffffff;     /* Blanco */
-    --text-sub: #d1d1d1;      /* Gris claro */
-    
-    /* TU GRADIENTE FAVORITO (Azul a Rosa) */
+    --bg-body: #020202;       
+    --text-main: #ffffff;     
+    --text-sub: #d1d1d1;      
     --neon-gradient: linear-gradient(135deg, #03a9f4, #f441a5);
 }
 
@@ -11,351 +9,205 @@
 
 body {
     font-family: 'Inter', sans-serif;
-    /* Fondo oscuro con un leve degradado radial en el centro para dar profundidad */
     background: radial-gradient(circle at center, #111111 0%, #000000 100%);
     color: var(--text-main);
-    /* Removed overflow-x: hidden and scrollbar-width: none from body */
-
-    /* --- CORRECCIONES PARA APPLE (SAFARI/IPHONE) --- */
-    /* Removed min-height from body */
-    overscroll-behavior: none; /* Adiós al rebote elástico (changed from overscroll-behavior-y) */
-    -webkit-text-size-adjust: 100%; /* Evita inflado de texto */
-    overflow: hidden; /* Prevent vertical scrolling on body, allow horizontal on container */
+    overscroll-behavior: none; 
+    -webkit-text-size-adjust: 100%; 
+    overflow: hidden; /* Importante: Bloquea scroll vertical del body */
 }
 body::-webkit-scrollbar { display: none; }
 
 /* Layout Horizontal */
 .horizontal-wrapper { 
     width: 100vw; 
-    height: 100dvh; /* Take full viewport height */
+    height: 100dvh; 
     position: relative; 
-    /* Removed height: 400vh */
 }
 
 .sticky-container { 
     position: sticky; 
     top: 0; 
     width: 100vw; 
-    overflow-x: scroll; /* Enable horizontal scrolling */
-    overflow-y: hidden; /* Prevent vertical scrolling within sticky container */
-    scroll-snap-type: x mandatory; /* Enable horizontal snap */
-    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
-
-    /* --- CORRECCIÓN ALTURA --- */
-    height: 100vh; 
-    height: 100dvh; /* Se adapta a la barra de herramientas móvil */
+    height: 100dvh; 
+    
+    /* --- AQUÍ ESTÁ LA CLAVE DEL SCROLL --- */
+    overflow-x: auto; 
+    overflow-y: hidden; 
+    white-space: nowrap; /* Asegura que los hijos estén en línea */
+    
+    /* 'proximity' deja que el JS funcione suave sin pelear */
+    scroll-snap-type: x proximity; 
+    scroll-behavior: auto; /* Dejamos 'auto' para que el JS controle la suavidad */
+    -webkit-overflow-scrolling: touch; 
 }
-.sticky-container::-webkit-scrollbar { /* Hide scrollbar for sticky-container */
-    display: none;
-}
-
+.sticky-container::-webkit-scrollbar { display: none; }
 
 .scroll-content { 
     display: flex; 
-    width: 400vw; /* Total width for all sections */
+    width: max-content; /* Se adapta al contenido (4 secciones) */
     height: 100%; 
-    /* Removed will-change: transform as JS transform is being removed */
 }
 
 section {
     width: 100vw;
-    scroll-snap-align: start; /* Make each section a snap point */
-    
-    /* --- CORRECCIÓN ALTURA --- */
-    height: 100vh;
-    height: 100dvh; /* Centrado perfecto en iPhone */
-    
+    height: 100dvh;
+    scroll-snap-align: start; 
     position: relative;
     padding: 0 8vw;
-    display: flex;
+    display: inline-flex; /* Asegura comportamiento en línea */
     flex-direction: column;
     justify-content: center;
     flex-shrink: 0;
     overflow: hidden;
-    /* Quitamos fondos individuales para que sea todo continuo */
     background: transparent; 
+    white-space: normal; /* Resetea el texto para que no sea una línea infinita */
 }
 
-/* --- ICONOS DE FONDO (El Protagonista) --- */
+/* --- ESTILOS VISUALES --- */
 .bg-icon {
     position: absolute;
-    bottom: -10%;
-    right: -5%;
-    font-size: 55vw; 
-    line-height: 1;
-    z-index: 1;
-    pointer-events: none;
+    bottom: -10%; right: -5%;
+    font-size: 55vw; line-height: 1;
+    z-index: 1; pointer-events: none;
     transition: all 1s ease;
-    
-    /* AQUI ESTÁ LA MAGIA DEL NEÓN */
     background: var(--neon-gradient);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    
-    /* Opacidad baja para no tapar el texto, pero con brillo */
     opacity: 0.15; 
     filter: drop-shadow(0 0 40px rgba(244, 65, 165, 0.3));
 }
 
-/* --- TEXTO (Limpio y sin Cajas) --- */
 .content-safe {
-    position: relative;
-    z-index: 10;
-    max-width: 900px;
-    /* Sin fondos, sin bordes, flotando libre */
-    background: transparent;
-    padding: 0; 
+    position: relative; z-index: 10; max-width: 900px;
+    background: transparent; padding: 0; 
 }
 
 h1 {
     font-size: clamp(3.5rem, 7vw, 9rem);
-    line-height: 0.9;
-    font-weight: 900;
-    margin-bottom: 1.5rem;
-    text-transform: uppercase;
-    color: #fff;
-    opacity: 0;
-    transform: translateX(-50px);
-    /* Sombra de texto para separarlo del fondo */
+    line-height: 0.9; font-weight: 900; margin-bottom: 1.5rem;
+    text-transform: uppercase; color: #fff;
+    opacity: 0; transform: translateX(-50px);
     text-shadow: 0 5px 15px rgba(0,0,0,0.8);
 }
 
 .subtitle {
-    font-size: clamp(1.1rem, 1.3vw, 1.6rem);
-    margin-bottom: 2.5rem;
-    opacity: 0;
-    transform: translateX(-30px);
-    color: var(--text-sub);
-    font-weight: 300;
-    line-height: 1.6;
-    max-width: 80%;
+    font-size: clamp(1.1rem, 1.3vw, 1.6rem); margin-bottom: 2.5rem;
+    opacity: 0; transform: translateX(-30px);
+    color: var(--text-sub); font-weight: 300; line-height: 1.6; max-width: 80%;
 }
 
-/* --- LISTA DE CARACTERÍSTICAS --- */
 .features {
-    display: flex;
-    gap: 3rem;
-    list-style: none;
-    opacity: 0;
-    margin-top: 1rem;
+    display: flex; gap: 3rem; list-style: none; opacity: 0; margin-top: 1rem;
 }
 .features li { 
-    font-weight: 700; 
-    color: #fff;
-    display: flex; 
-    align-items: center; 
-    gap: 12px;
-    font-size: 1.1rem;
-    text-transform: uppercase;
-    letter-spacing: 1px;
+    font-weight: 700; color: #fff; display: flex; align-items: center; 
+    gap: 12px; font-size: 1.1rem; text-transform: uppercase; letter-spacing: 1px;
 }
-
-/* Los iconos pequeños de la lista también en gradiente */
 .features li i {
-    font-size: 1.4rem;
-    background: var(--neon-gradient);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    font-size: 1.4rem; background: var(--neon-gradient);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
 }
 
-  .card-2 .features li i {
-    font-size: 1.4rem;
-    background: red;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-}
-
-/* Flecha Animada */
-/* .hero-arrow {
-    position: absolute;
-    bottom: 50px; right: 50px;
-    font-size: 4rem;
-    background: var(--neon-gradient);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    transform: rotate(135deg);
-    animation: bounce 4s infinite;
-    
-    z-index: 100;
+/* --- ANIMACIONES --- */
+.hero-arrow {
+    position: absolute; bottom: 50px; right: 50px; font-size: 4rem;
+    background: var(--neon-gradient); -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent; transform: rotate(135deg);
+    animation: bounce 4s infinite; z-index: 100;
 }
 @keyframes bounce {
     0%, 100% { transform: translateY(0) rotate(135deg); }
     50% { transform: translateY(-20px) rotate(135deg); }
-} */
-
-/* --- FORMULARIO Y CIERRE (Card 4) --- */
-.card-4 { display: grid; grid-template-columns: 1fr 1fr; padding: 0; }
-
-.cta-text { 
-    padding: 8vw; 
-    display: flex; flex-direction: column; justify-content: center;
 }
 
-.cta-form { 
-    padding: 8vw;
-    display: flex; 
-    flex-direction: column; 
-    justify-content: center;
-    /* Fondo sutilmente oscuro para el formulario para que se lean los inputs */
-    background: rgba(255, 255, 255, 0.03); 
-    backdrop-filter: blur(10px);
-}
-
-/* Inputs Minimalistas Dark */
-input {
-    width: 100%;
-    padding: 1.5rem 0; /* Padding vertical, sin horizontal */
-    margin-bottom: 1.5rem;
-    border: none;
-    border-bottom: 1px solid #444;
-    font-size: 1.1rem;
-    background: transparent;
-    color: #fff;
-}
-input::placeholder { color: #666; }
-input:focus {
-    outline: none;
-    border-bottom: 1px solid #f441a5; /* Linea rosa al escribir */
-    background: linear-gradient(90deg, rgba(3, 169, 244, 0.1), transparent);
-}
-
-/* --- TUS BOTONES (Estilo Preservado) --- */
-.btn-submit, #mobile-btn {
-    width: 100%;
-    display: block; 
-    text-align: center;
-    margin-top: 1rem;
-    text-decoration: none;
-    font-size: 1.2rem;
-    padding: 1rem;
-    border-radius: 0.5em;
-    border: none;
-    background-color: #000;
-    color: #fff;
-    cursor: pointer;
-    font-weight: 900;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    position: relative; 
-    z-index: 2; 
-    transition: transform 0.2s ease;
-}
-
-.btn-submit::before, #mobile-btn::before {
-    content: ""; position: absolute; inset: -3px; border-radius: 0.6em; z-index: -1;
-    background: var(--neon-gradient);
-    filter: blur(0); transition: filter 0.4s ease;
-}
-
-.btn-submit:hover::before, #mobile-btn:hover::before {
-    filter: blur(1.2em);
-}
-.btn-submit:active { transform: scale(0.98); }
-
-
-/* --- ANIMACIONES --- */
 .active-section h1 { animation: slideIn 0.8s forwards; }
 .active-section .subtitle { animation: slideIn 0.8s 0.2s forwards; }
 .active-section .features { animation: slideIn 0.8s 0.4s forwards; }
-
-/* El icono brilla más cuando llegas a la sección */
 .active-section .bg-icon { 
-    opacity: 0.3; /* Sube la intensidad */
-    transform: scale(1.05);
+    opacity: 0.3; transform: scale(1.05);
     filter: drop-shadow(0 0 60px rgba(3, 169, 244, 0.4));
 }
-
 @keyframes slideIn {
     from { opacity: 0; transform: translateY(40px); }
     to { opacity: 1; transform: translateY(0); }
 }
 
+/* --- CARD 4 (FORMULARIO SPLIT SCREEN) --- */
+.card-4 { 
+    display: grid; 
+    /* Forzamos 50% y 50% explícitamente */
+    grid-template-columns: 50% 50%; 
+    padding: 0; 
+    width: 100vw; /* Asegurar ancho completo */
+}
+
+.cta-text { 
+    padding: 8vw; display: flex; flex-direction: column; justify-content: center;
+}
+
+.cta-form { 
+    padding: 8vw; display: flex; flex-direction: column; justify-content: center;
+    background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(10px);
+    height: 100%; /* Llenar altura */
+}
+
+input {
+    width: 100%; padding: 1.5rem 0; margin-bottom: 1.5rem;
+    border: none; border-bottom: 1px solid #444;
+    font-size: 1.1rem; background: transparent; color: #fff;
+}
+input:focus {
+    outline: none; border-bottom: 1px solid #f441a5;
+}
+
+.btn-submit, #mobile-btn {
+    width: 100%; padding: 1rem; border-radius: 0.5em; border: none;
+    background-color: #000; color: #fff; cursor: pointer;
+    font-weight: 900; text-transform: uppercase; letter-spacing: 1px;
+    position: relative; z-index: 2; transition: transform 0.2s ease;
+    margin-top: 1rem;
+}
+.btn-submit::before, #mobile-btn::before {
+    content: ""; position: absolute; inset: -3px; border-radius: 0.6em; z-index: -1;
+    background: var(--neon-gradient); filter: blur(0); transition: filter 0.4s ease;
+}
+.btn-submit:hover::before, #mobile-btn:hover::before { filter: blur(1.2em); }
+
 /* --- MOBILE --- */
 #mobile-btn { display: none; }
 
 @media (max-width: 768px) {
+    /* En móvil cambiamos a 1 columna */
     .card-4 { grid-template-columns: 1fr; }
-    .cta-form { display: none; }
+    .cta-form { display: none; } /* Ocultamos formulario en móvil (usa modal) */
     
     .subtitle { max-width: 100%; font-size: 1rem; }
-    
-    /* Tu corrección de features en columna */
-    .features {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 1.2rem;
-    }
+    .features { flex-direction: column; gap: 1.2rem; }
     
     #mobile-btn { display: block; margin-top: 2rem; }
-    
-    /* Icono más pequeño en mobile para no molestar */
     .bg-icon { font-size: 90vw; opacity: 0.1; right: -20%; }
-    .active-section .bg-icon { opacity: 0.15; }
 }
 
-/* --- MODAL (Corrección Mobile) --- */
+/* --- MODAL --- */
 #modal {
-    position: fixed; 
-    top: 0; 
-    left: 0; 
-    width: 100%; 
-    height: 100%;
-    background: rgba(0,0,0,0.95);
-    z-index: 2000; 
-    padding: 2rem;
-    
-    /* Configuración Flex para centrar */
-    display: none; /* JS lo cambia a flex */
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    backdrop-filter: blur(5px); /* Efecto borroso elegante */
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.95); z-index: 2000; padding: 2rem;
+    display: none; flex-direction: column; justify-content: center; align-items: center;
+    backdrop-filter: blur(5px);
 }
-
-/* Contenedor del formulario dentro del modal */
-#modal-content {
-    width: 100%;
-    max-width: 450px; /* Para que no se estire demasiado */
-    position: relative;
-}
-
-/* Botón de cerrar */
+#modal-content { width: 100%; max-width: 450px; position: relative; }
 .close-modal-btn {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    border: none;
-    background: none;
-    font-size: 2.5rem;
-    color: #fff;
-    cursor: pointer;
-    z-index: 2001;
-    line-height: 1;
+    position: absolute; top: 20px; right: 20px; border: none; background: none;
+    font-size: 2.5rem; color: #fff; cursor: pointer; z-index: 2001;
 }
+#modal form { display: flex; flex-direction: column; width: 100%; }
 
-/* Asegurar que el formulario se vea bien dentro del modal */
-#modal form {
-    background: transparent; /* Quitar fondo si lo tiene heredado */
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-}
-/* --- BARRA DE PROGRESO (Recuperada) --- */
+/* Barra Progreso */
 #progress-container {
-    position: fixed;
-    top: 0; left: 0; width: 100%; height: 5px;
-    background: rgba(255, 255, 255, 0.05); /* Fondo gris muy sutil */
-    z-index: 1000;
+    position: fixed; top: 0; left: 0; width: 100%; height: 5px;
+    background: rgba(255, 255, 255, 0.05); z-index: 1000;
 }
-
 #progress-bar {
-    height: 100%;
-    width: 0%;
-    /* Usamos tu gradiente neón para que combine */
-    background: var(--neon-gradient); 
-    box-shadow: 0 0 10px rgba(244, 65, 165, 0.7); /* Un poco de brillo (Glow) */
-    transition: width 0.1s linear;
+    height: 100%; width: 0%; background: var(--neon-gradient);
+    box-shadow: 0 0 10px rgba(244, 65, 165, 0.7); transition: width 0.1s linear;
 }
-
-/* Animación del punto parpadeante */
-@keyframes blink { 50% { opacity: 0; } }

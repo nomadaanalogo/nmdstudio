@@ -1,15 +1,13 @@
-const canvas = document.getElementById("master-canvas");
 const sections = document.querySelectorAll("section");
-const stickyContainer = document.querySelector(".sticky-container"); // Get the scrolling container
-const bar = document.getElementById("progress-bar"); // Keep for now, but its functionality is removed
-
+const stickyContainer = document.querySelector(".sticky-container");
+const bar = document.getElementById("progress-bar");
 const GOOGLE_URL = "https://script.google.com/macros/s/AKfycbx_ksRnCz0bpcrNNt_SET0ONCMvhDoUAEh5oeDED0-NCrxLOf96gk3adlupfPPywLXQ/exec"; 
 
-// --- 1. LÓGICA DE ANIMACIÓN (IntersectionObserver para active-section) ---
+// --- 1. DETECTOR DE SECCIÓN ACTIVA ---
 const observerOptions = {
-    root: stickyContainer, // Observe intersections within the scrolling container
+    root: stickyContainer,
     rootMargin: "0px",
-    threshold: 0.5 // Trigger when 50% of the section is visible
+    threshold: 0.5 
 };
 
 const sectionObserver = new IntersectionObserver((entries) => {
@@ -26,21 +24,46 @@ sections.forEach(section => {
     sectionObserver.observe(section);
 });
 
-// --- 2. BARRA DE PROGRESO (Adaptada a scroll horizontal) ---
-// This will update the progress bar based on horizontal scroll
+// --- 2. BARRA DE PROGRESO (Barra superior) ---
 stickyContainer.addEventListener("scroll", () => {
     const scrollLeft = stickyContainer.scrollLeft;
     const scrollWidth = stickyContainer.scrollWidth - stickyContainer.clientWidth;
     if (scrollWidth > 0) {
         const scrollProgress = (scrollLeft / scrollWidth) * 100;
         bar.style.width = `${scrollProgress}%`;
-    } else {
-        bar.style.width = "0%";
     }
 });
 
+// --- 3. SCROLL UNIVERSAL (LA MAGIA) ---
+// Escuchamos en toda la ventana para que no falle nunca
+window.addEventListener("wheel", (evt) => {
+    // Si hay un modal abierto, no hacemos scroll horizontal
+    if(document.getElementById("modal").style.display === "flex") return;
 
-// --- 3. FORMULARIO & MODAL ---
+    const container = document.querySelector(".sticky-container");
+    if (!container) return;
+
+    // A. ¿El usuario está deslizando horizontalmente con trackpad? -> DEJAR NATIVO
+    // Comparamos el movimiento X vs Y. Si X es mayor, es intención horizontal.
+    if (Math.abs(evt.deltaX) > Math.abs(evt.deltaY)) {
+        return; 
+    }
+
+    // B. ¿Es rueda del mouse o gesto vertical? -> CONVERTIR A HORIZONTAL
+    evt.preventDefault();
+    
+    // Multiplicador de velocidad (ajústalo si lo sientes lento o rápido)
+    const velocidad = 2.5; 
+
+    container.scrollBy({
+        left: evt.deltaY * velocidad,
+        behavior: "auto" // 'auto' es mejor que 'smooth' aquí para respuesta instantánea
+    });
+
+}, { passive: false });
+
+
+// --- 4. FORMULARIO & MODAL ---
 const formHandler = async (e) => {
     e.preventDefault();
     
@@ -85,10 +108,7 @@ function openModal() {
     const form = document.getElementById("mainForm");
     
     modal.style.display = "flex"; 
-    // Movemos el formulario al modal
     modalContent.appendChild(form);
-    
-    // Aseguramos que el formulario sea visible (por si estaba oculto en mobile)
     form.style.display = "flex";
 }
 
@@ -99,10 +119,8 @@ function closeModal() {
     
     modal.style.display = "none";
     
-    // Devolvemos el formulario a su lugar original
     if(desktopContainer) {
         desktopContainer.appendChild(form);
-        // Restauramos el display original (flex en desktop, o block, según CSS)
         form.style.display = ""; 
     }
 }
