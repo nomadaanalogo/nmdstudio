@@ -1,9 +1,38 @@
+const canvas = document.getElementById("master-canvas");
 const sections = document.querySelectorAll("section");
 const stickyContainer = document.querySelector(".sticky-container");
 const bar = document.getElementById("progress-bar");
+
 const GOOGLE_URL = "https://script.google.com/macros/s/AKfycbx_ksRnCz0bpcrNNt_SET0ONCMvhDoUAEh5oeDED0-NCrxLOf96gk3adlupfPPywLXQ/exec"; 
 
-// --- 1. DETECTOR DE SECCIÓN ACTIVA ---
+// --- VARIABLES DE CONTROL DE SCROLL (Card a Card) ---
+let currentSectionIndex = 0; // Índice actual (0, 1, 2, 3)
+let isScrolling = false;     // Semáforo para bloquear spam de scroll
+const totalSections = sections.length;
+
+// --- 1. FUNCIÓN MAESTRA DE MOVIMIENTO ---
+function scrollToSection(index) {
+    // Validar que el índice exista (no ir menos de 0 ni más del total)
+    if (index < 0 || index >= totalSections) return;
+
+    isScrolling = true; // Bloqueamos nuevos inputs
+    currentSectionIndex = index; // Actualizamos dónde estamos
+
+    // Calculamos a qué pixel movernos (Ancho de pantalla * número de sección)
+    const targetLeft = window.innerWidth * index;
+
+    stickyContainer.scrollTo({
+        left: targetLeft,
+        behavior: "smooth"
+    });
+
+    // Esperamos 800ms (tiempo aprox de la animación) antes de permitir otro movimiento
+    setTimeout(() => {
+        isScrolling = false;
+    }, 800);
+}
+
+// --- 2. DETECTOR DE SECCIÓN ACTIVA (VISUAL) ---
 const observerOptions = {
     root: stickyContainer,
     rootMargin: "0px",
@@ -24,46 +53,86 @@ sections.forEach(section => {
     sectionObserver.observe(section);
 });
 
-// --- 2. BARRA DE PROGRESO (Barra superior) ---
+// --- 3. BARRA DE PROGRESO Y SINCRONIZACIÓN ---
 stickyContainer.addEventListener("scroll", () => {
+    // Actualizamos la barra
     const scrollLeft = stickyContainer.scrollLeft;
     const scrollWidth = stickyContainer.scrollWidth - stickyContainer.clientWidth;
-    if (scrollWidth > 0) {
+    if (scrollWidth > 0 && bar) {
         const scrollProgress = (scrollLeft / scrollWidth) * 100;
         bar.style.width = `${scrollProgress}%`;
     }
+
+    // Si el usuario mueve el scroll nativamente (trackpad horizontal),
+    // actualizamos nuestro índice para no perdernos.
+    if (!isScrolling) {
+        currentSectionIndex = Math.round(stickyContainer.scrollLeft / window.innerWidth);
+    }
 });
 
-// --- 3. SCROLL UNIVERSAL (LA MAGIA) ---
-// Escuchamos en toda la ventana para que no falle nunca
+// --- 4. SCROLL EN PC (RUEDA DEL MOUSE) ---
 window.addEventListener("wheel", (evt) => {
-    // Si hay un modal abierto, no hacemos scroll horizontal
-    if(document.getElementById("modal").style.display === "flex") return;
+    // Si el modal está abierto, no hacer nada
+    const modal = document.getElementById("modal");
+    if (modal && modal.style.display === "flex") return;
 
-    const container = document.querySelector(".sticky-container");
-    if (!container) return;
+    if (isScrolling) return; // Si ya se está moviendo, ignorar
 
-    // A. ¿El usuario está deslizando horizontalmente con trackpad? -> DEJAR NATIVO
-    // Comparamos el movimiento X vs Y. Si X es mayor, es intención horizontal.
+    // Si es scroll horizontal nativo (Trackpad izquierda/derecha), dejarlo pasar
     if (Math.abs(evt.deltaX) > Math.abs(evt.deltaY)) {
         return; 
     }
 
-    // B. ¿Es rueda del mouse o gesto vertical? -> CONVERTIR A HORIZONTAL
+    // Si es vertical (Rueda), convertir a PASOS
     evt.preventDefault();
+
+    if (evt.deltaY > 0) {
+        // Rueda abajo -> Siguiente
+        scrollToSection(currentSectionIndex + 1);
+    } else {
+        // Rueda arriba -> Anterior
+        scrollToSection(currentSectionIndex - 1);
+    }
+}, { passive: false });
+
+// --- 5. SCROLL EN MÓVIL (TOUCH VERTICAL -> PASOS) ---
+let touchStartY = 0;
+let touchStartX = 0;
+
+stickyContainer.addEventListener('touchstart', (e) => {
+    touchStartY = e.touches[0].clientY;
+    touchStartX = e.touches[0].clientX;
     
-    // Multiplicador de velocidad (ajústalo si lo sientes lento o rápido)
-    const velocidad = 2.5; 
+    // Sincronizar índice por seguridad
+    currentSectionIndex = Math.round(stickyContainer.scrollLeft / window.innerWidth);
+}, { passive: true });
 
-    container.scrollBy({
-        left: evt.deltaY * velocidad,
-        behavior: "auto" // 'auto' es mejor que 'smooth' aquí para respuesta instantánea
-    });
+stickyContainer.addEventListener('touchmove', (e) => {
+    if (isScrolling) return;
 
+    const touchEndY = e.touches[0].clientY;
+    const touchEndX = e.touches[0].clientX;
+
+    const diffY = touchStartY - touchEndY; // Diferencia Vertical
+    const diffX = touchStartX - touchEndX; // Diferencia Horizontal
+
+    // Lógica: Si el movimiento es Vertical (más Y que X) y es largo (> 50px)
+    if (Math.abs(diffY) > Math.abs(diffX) && Math.abs(diffY) > 50) {
+        
+        if (e.cancelable) e.preventDefault(); // Evitar scroll nativo vertical
+
+        if (diffY > 0) {
+            // Dedo hacia arriba (queremos bajar) -> Siguiente
+            scrollToSection(currentSectionIndex + 1);
+        } else {
+            // Dedo hacia abajo (queremos subir) -> Anterior
+            scrollToSection(currentSectionIndex - 1);
+        }
+    }
 }, { passive: false });
 
 
-// --- 4. FORMULARIO & MODAL ---
+// --- 6. FORMULARIO & MODAL ---
 const formHandler = async (e) => {
     e.preventDefault();
     
@@ -107,9 +176,11 @@ function openModal() {
     const modalContent = document.getElementById("modal-content");
     const form = document.getElementById("mainForm");
     
-    modal.style.display = "flex"; 
-    modalContent.appendChild(form);
-    form.style.display = "flex";
+    if(modal && modalContent && form) {
+        modal.style.display = "flex"; 
+        modalContent.appendChild(form);
+        form.style.display = "flex";
+    }
 }
 
 function closeModal() {
@@ -117,44 +188,11 @@ function closeModal() {
     const form = document.getElementById("mainForm");
     const desktopContainer = document.querySelector(".cta-form");
     
-    modal.style.display = "none";
+    if(modal) modal.style.display = "none";
     
-    if(desktopContainer) {
+    // Devolver el form a su lugar original si estamos en desktop
+    if(desktopContainer && form) {
         desktopContainer.appendChild(form);
         form.style.display = ""; 
     }
 }
-
-// --- 5. HACK PARA MÓVILES: SWIPE VERTICAL -> SCROLL HORIZONTAL ---
-let touchStartY = 0;
-let touchStartX = 0;
-
-stickyContainer.addEventListener('touchstart', (e) => {
-    touchStartY = e.touches[0].clientY;
-    touchStartX = e.touches[0].clientX;
-}, { passive: true });
-
-stickyContainer.addEventListener('touchmove', (e) => {
-    if (!touchStartY || !touchStartX) return;
-
-    const touchEndY = e.touches[0].clientY;
-    const touchEndX = e.touches[0].clientX;
-
-    const diffY = touchStartY - touchEndY; // Cuánto movió el dedo verticalmente
-    const diffX = touchStartX - touchEndX; // Cuánto movió el dedo horizontalmente
-
-    // Si el movimiento es mayormente VERTICAL (el usuario quiere bajar/subir)
-    // y es más significativo que el movimiento horizontal...
-    if (Math.abs(diffY) > Math.abs(diffX) && Math.abs(diffY) > 5) {
-        
-        // Movemos el scroll horizontalmente usando la diferencia vertical
-        // Multiplicamos por 1.5 para que se sienta ágil
-        stickyContainer.scrollLeft += diffY * 1.5;
-        
-        // Prevenir el comportamiento nativo (evitar recargar página o rebotes raros)
-        if (e.cancelable) e.preventDefault();
-        
-        // Actualizamos la posición de inicio para que el movimiento sea continuo
-        touchStartY = touchEndY;
-    }
-}, { passive: false });
