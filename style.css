@@ -90,6 +90,7 @@ h1 {
     -webkit-background-clip: text; -webkit-text-fill-color: transparent;
 }
 
+
 /* Icono de Fondo */
 .bg-icon {
     position: absolute; bottom: -10%; right: -5%;
@@ -209,9 +210,14 @@ input:focus { outline: none; border-bottom: 1px solid #f441a5; }
     .bg-icon { font-size: 80vw; opacity: 0.05; }
     h1 { font-size: 3.5rem; }
     
-    /* En móvil, la flecha rebota hacia abajo para indicar swipe natural si quieres, 
-       o a la derecha si es horizontal */
-    .hero-arrow-indicator { display: none; } 
+    
+    .hero-arrow-indicator { 
+    display: block;          /* ¡Aquí la revivimos! (Antes decía none) */
+    font-size: 3rem;       /* Un poco más chica que en PC */
+    bottom: 70px;            /* Posición ajustada para móvil */
+    right: 70px;
+    opacity: 0.8;
+}
 }
 
 /* MODAL */
@@ -223,4 +229,22 @@ input:focus { outline: none; border-bottom: 1px solid #f441a5; }
 .close-modal-btn {
     position: absolute; top: 20px; right: 20px; font-size: 2rem; 
     color: #fff; background: none; border: none; cursor: pointer;
+}
+
+
+/* --- ICONOS ROJOS (SOLO CARD 2) --- */
+#section-2 .features li i {
+    /* Cambiamos el gradiente azul/rosa por uno Rojo/Naranja */
+    background: linear-gradient(135deg, #ff9966, #ff0000); 
+    
+    /* Mantenemos la magia del texto transparente */
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* Opcional: Si también quieres el ícono grande de fondo en rojo */
+#section-2 .bg-icon {
+    background: linear-gradient(135deg, #ff9966, #ff0000); 
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
