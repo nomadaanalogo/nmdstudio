@@ -14,35 +14,52 @@ body {
     /* Fondo oscuro con un leve degradado radial en el centro para dar profundidad */
     background: radial-gradient(circle at center, #111111 0%, #000000 100%);
     color: var(--text-main);
-    overflow-x: hidden;
-    scrollbar-width: none;
+    /* Removed overflow-x: hidden and scrollbar-width: none from body */
 
     /* --- CORRECCIONES PARA APPLE (SAFARI/IPHONE) --- */
-    min-height: 100vh;
-    min-height: 100dvh;          /* Altura dinámica real */
-    overscroll-behavior-y: none; /* Adiós al rebote elástico */
+    /* Removed min-height from body */
+    overscroll-behavior: none; /* Adiós al rebote elástico (changed from overscroll-behavior-y) */
     -webkit-text-size-adjust: 100%; /* Evita inflado de texto */
+    overflow: hidden; /* Prevent vertical scrolling on body, allow horizontal on container */
 }
 body::-webkit-scrollbar { display: none; }
 
 /* Layout Horizontal */
-.horizontal-wrapper { height: 400vh; position: relative; }
+.horizontal-wrapper { 
+    width: 100vw; 
+    height: 100dvh; /* Take full viewport height */
+    position: relative; 
+    /* Removed height: 400vh */
+}
 
 .sticky-container { 
     position: sticky; 
     top: 0; 
     width: 100vw; 
-    overflow: hidden; 
+    overflow-x: scroll; /* Enable horizontal scrolling */
+    overflow-y: hidden; /* Prevent vertical scrolling within sticky container */
+    scroll-snap-type: x mandatory; /* Enable horizontal snap */
+    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
 
     /* --- CORRECCIÓN ALTURA --- */
     height: 100vh; 
     height: 100dvh; /* Se adapta a la barra de herramientas móvil */
 }
+.sticky-container::-webkit-scrollbar { /* Hide scrollbar for sticky-container */
+    display: none;
+}
 
-.scroll-content { display: flex; width: 400vw; height: 100%; will-change: transform; }
+
+.scroll-content { 
+    display: flex; 
+    width: 400vw; /* Total width for all sections */
+    height: 100%; 
+    /* Removed will-change: transform as JS transform is being removed */
+}
 
 section {
     width: 100vw;
+    scroll-snap-align: start; /* Make each section a snap point */
     
     /* --- CORRECCIÓN ALTURA --- */
     height: 100vh;
@@ -149,11 +166,10 @@ h1 {
 }
 
 /* Flecha Animada */
-.hero-arrow {
+/* .hero-arrow {
     position: absolute;
     bottom: 50px; right: 50px;
     font-size: 4rem;
-    /* Flecha en gradiente */
     background: var(--neon-gradient);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -165,7 +181,7 @@ h1 {
 @keyframes bounce {
     0%, 100% { transform: translateY(0) rotate(135deg); }
     50% { transform: translateY(-20px) rotate(135deg); }
-}
+} */
 
 /* --- FORMULARIO Y CIERRE (Card 4) --- */
 .card-4 { display: grid; grid-template-columns: 1fr 1fr; padding: 0; }
