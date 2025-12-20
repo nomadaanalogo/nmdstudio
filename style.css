@@ -134,13 +134,16 @@ h1 {
 
 /* --- CARD 4 (FORMULARIO SPLIT SCREEN) --- */
 .card-4 { 
+    
     display: grid; 
     /* Forzamos 50% y 50% explícitamente */
     grid-template-columns: 50% 50%; 
     padding: 0; 
     width: 100vw; /* Asegurar ancho completo */
 }
-
+.card-4 h1 
+{ font-size: clamp(2rem, 7vw, 5rem);
+}
 .cta-text { 
     padding: 8vw; display: flex; flex-direction: column; justify-content: center;
 }
