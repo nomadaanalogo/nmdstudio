@@ -176,8 +176,29 @@ input:focus { outline: none; border-bottom: 1px solid #f441a5; }
 }
 
 /* --- RESPONSIVE MOBILE --- */
-#mobile-btn { display: none; }
-.checkbox-label { font-size: 0.8rem; display: flex; align-items: center; gap: 10px; color: #aaa; }
+#mobile-btn { display: none; }  /* <--- ESTA DEJA LA QUIETA, ES IMPORTANTE */
+
+.checkbox-label { 
+    display: flex;           /* Pone el cuadro y el texto en fila */
+    align-items: center;     /* Los centra verticalmente */
+    gap: 10px;               /* Espacio entre cuadro y texto */
+    font-size: 0.75rem;      /* Pequeño pero legible (12px) */
+    color: #aaa;
+    width: 100%;             /* Que ocupe el ancho disponible sin salirse */
+    margin-bottom: 1rem;
+    cursor: pointer;
+}
+
+/* IMPORTANTE: Esto evita que el checkbox se estire al 100% como los otros inputs */
+.checkbox-label input {
+    width: auto;  
+    margin: 0;
+    border: none; /* Quita la línea inferior que tienen los inputs de texto */
+    padding: 0;
+}
+
+
+
 
 @media (max-width: 900px) {
     .card-split { grid-template-columns: 1fr; }
