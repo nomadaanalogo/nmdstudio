@@ -293,13 +293,53 @@ input:focus {
     .active-section .bg-icon { opacity: 0.15; }
 }
 
-/* Modal */
+/* --- MODAL (Corrección Mobile) --- */
 #modal {
-    position: fixed; top:0; left:0; width:100%; height:100%;
+    position: fixed; 
+    top: 0; 
+    left: 0; 
+    width: 100%; 
+    height: 100%;
     background: rgba(0,0,0,0.95);
-    z-index: 2000; display: none; padding: 2rem;
+    z-index: 2000; 
+    padding: 2rem;
+    
+    /* Configuración Flex para centrar */
+    display: none; /* JS lo cambia a flex */
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(5px); /* Efecto borroso elegante */
 }
 
+/* Contenedor del formulario dentro del modal */
+#modal-content {
+    width: 100%;
+    max-width: 450px; /* Para que no se estire demasiado */
+    position: relative;
+}
+
+/* Botón de cerrar */
+.close-modal-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    border: none;
+    background: none;
+    font-size: 2.5rem;
+    color: #fff;
+    cursor: pointer;
+    z-index: 2001;
+    line-height: 1;
+}
+
+/* Asegurar que el formulario se vea bien dentro del modal */
+#modal form {
+    background: transparent; /* Quitar fondo si lo tiene heredado */
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
 /* --- BARRA DE PROGRESO (Recuperada) --- */
 #progress-container {
     position: fixed;
