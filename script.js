@@ -56,8 +56,56 @@ window.addEventListener("wheel", (e) => {
 
 
 // --- 3. DETECTOR TÁCTIL (Mejorado para inercia) ---
-// Eliminamos la lógica táctil compleja anterior porque causaba conflictos con el scroll nativo.
-// Al usar el body de 400vh, el scroll táctil nativo funciona mejor por sí solo.
+// N.B. Reintroducing touch logic to handle horizontal swipes
+let touchStartX = 0;
+let touchStartY = 0;
+const SWIPE_THRESHOLD = 50; // Minimum pixels for a swipe to be recognized
+
+window.addEventListener('touchstart', (e) => {
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
+}, { passive: true }); // Use passive to avoid blocking scroll if not a swipe
+
+window.addEventListener('touchmove', (e) => {
+    const touchMoveX = e.touches[0].clientX;
+    const touchMoveY = e.touches[0].clientY;
+    const diffX = touchStartX - touchMoveX;
+    const diffY = touchStartY - touchMoveY;
+
+    // If it's primarily a horizontal movement
+    if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 10) { // Small threshold to detect initial horizontal drag
+        e.preventDefault(); // Prevent vertical scrolling for horizontal swipes
+    }
+}, { passive: false }); // Needs to be non-passive to call preventDefault
+
+window.addEventListener('touchend', (e) => {
+    const touchEndX = e.changedTouches[0].clientX;
+    const diffX = touchStartX - touchEndX;
+
+    if (Math.abs(diffX) > SWIPE_THRESHOLD) {
+        const sectionHeight = window.innerHeight;
+        const currentScrollPosition = window.scrollY;
+        const currentSectionIndex = Math.round(currentScrollPosition / sectionHeight);
+
+        if (diffX > 0) { // Swipe left (next section)
+            // Ensure we don't go past the last section
+            if (currentSectionIndex < sections.length - 1) {
+                window.scrollTo({
+                    top: (currentSectionIndex + 1) * sectionHeight,
+                    behavior: 'smooth'
+                });
+            }
+        } else { // Swipe right (previous section)
+            // Ensure we don't go before the first section
+            if (currentSectionIndex > 0) {
+                window.scrollTo({
+                    top: (currentSectionIndex - 1) * sectionHeight,
+                    behavior: 'smooth'
+                });
+            }
+        }
+    }
+});
 
 
 // --- 4. SNAP EFFECT ELIMINADO ---
