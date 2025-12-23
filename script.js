@@ -173,7 +173,11 @@ if(mainForm) {
 
         // 2. REDIRECCIÓN INMEDIATA
         // Al no haber 'await' ni 'setTimeout', el móvil permite abrir la app
-        const msg = `Hola! Me interesa la promo Landing Page.%0A*Nombre:* ${data.name}`;
+       
+       const negocio = data.business_desc || "No especificado";
+       // Armamos el mensaje para que te llegue todo ordenado
+        const msg = `Hola! Quiero mi demo gratis en 24hs.%0A%0A*Nombre:* ${data.name}%0A*Negocio:* ${negocio}`;
+       
         window.location.href = `https://wa.me/573154483584?text=${msg}`;
 
         // 3. Limpieza visual (por si el usuario vuelve atrás)
@@ -226,3 +230,4 @@ if (mobileBtn) {
         window.openModal();
     });
 }
+

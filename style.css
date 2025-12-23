@@ -249,3 +249,23 @@ input:focus { outline: none; border-bottom: 1px solid #f441a5; }
    position: absolute; bottom: 25%; right: 18%;
    
 }
+
+/* Estilo para el nuevo campo de descripción */
+textarea {
+    width: 100%; 
+    padding: 1.2rem 0; 
+    margin-bottom: 1.5rem;
+    border: none; 
+    border-bottom: 1px solid #333;
+    font-size: 1.1rem; 
+    background: transparent; 
+    color: #fff;
+    font-family: 'Inter', sans-serif; /* Para que tenga la misma letra */
+    resize: none; /* Evita que rompan el diseño agrandando el cuadro */
+    transition: border-color 0.3s;
+}
+
+textarea:focus { 
+    outline: none; 
+    border-bottom: 1px solid #f441a5; 
+}

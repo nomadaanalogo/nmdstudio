@@ -80,35 +80,61 @@ src="https://www.facebook.com/tr?id=1626174025498909&ev=PageView&noscript=1"
             </div>
         </section>
 
-        <section class="card card-split" id="section-4">
+      <section class="card card-split" id="section-4">
             <i class="fas fa-comment-dots bg-icon icon-cta"></i>
+            
             <div class="cta-text">
                
-                <h1>¿SUBIMOS DE NIVEL?</h1>
+                <h1 style="font-size: clamp(2.5rem, 6vw, 4rem);">VER PARA<br>CREER.</h1>
+                
                 <div class="price-box">
-                    <span class="old-price">Antes $900 USD</span>
-                    <span class="new-price">$128 <small>USD</small></span>
-                    <span class="promo-tag">Oferta por tiempo limitado</span>
+                    <div style="margin-bottom: 10px;">
+                        <span class="old-price">Demo grátis</span>
+                        <span class="new-price" style="color:#00eeff;">$0 <small>HOY</small></span>
+                    </div>
+                    
+                    <div style="opacity: 0.8;">
+                        <span class="promo-tag" style="font-size: 0.9rem;">Activación del Sistema:</span>
+                        <span style="font-size: 1.8rem; font-weight: 800; color: #fff;">$128 <small>USD</small></span>
+                    </div>
                 </div>
                 
                 <p class="disclaimer">
-                    <span class="cyan-text">Pago único por diseño</span><br>
-                    <span class="small-disclaimer">Renovación anual de hosting y dominio sujeta a precio del mercado</span><br>
-                    <span class="red-alert"><i class="fas fa-circle blink"></i> Agenda sujeta a cupos</span>
+                    <span class="highlight-text">PRUEBA TU PROPIA MEDICINA:</span><br>
+                
+                    
+                    1. Llena tus datos. <br>
+                    2. Recibe la automatización en tu email.<br>
+                    3. Si te gusta la experiencia, cargamos tu web.<br>
+                    
+                    <span class="red-alert" style="margin-top:15px;">
+                        <i class="fas fa-circle blink"></i> Solo 3 demos disponibles hoy
+                    </span>
                 </p>
                 
-                <button id="mobile-btn" onclick="openModal()">EMPEZAR AHORA</button>
+                <button id="mobile-btn" onclick="openModal()">PEDIR MI DEMO</button>
             </div>
 
             <div class="cta-form-container">
                 <form id="mainForm">
-                    <input type="text" name="name" placeholder="Nombre completo" required>
-                    <input type="email" name="email" placeholder="Tu mejor email" required>
-                    <input type="tel" name="phone" placeholder="WhatsApp " required>
+                    
+
+                    <input type="text" name="name" placeholder="Tu Nombre" required>
+                    
+                    <input type="email" name="email" placeholder="Tu Email (Para enviarte la prueba)" required>
+
+                    <textarea name="business_desc" rows="2" placeholder="Describe tu negocio (Ej: Vendo Zapatillas, Soy Abogado...)" required></textarea>
+                    
+                    <input type="tel" name="phone" placeholder="WhatsApp (Para contacto rápido)" required>
+                    
                     <label class="checkbox-label">
-                        <input type="checkbox" checked required> Acepto el uso de mis datos para contacto comercial.
+                        <input type="checkbox" checked required> 
+                     Acepto el uso de mis datos para contacto comercial.
                     </label>
-                    <button type="submit" class="btn-submit">ENVIAR A WHATSAPP <i class="fab fa-whatsapp"></i></button>
+                    
+                    <button type="submit" class="btn-submit">
+                        QUIERO MI DEMO AHORA <i class="fas fa-magic"></i>
+                    </button>
                 </form>
             </div>
         </section>
