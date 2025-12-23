@@ -185,3 +185,44 @@ if(mainForm) {
         }, 1000);
     });
 }
+
+
+// --- 7. LÓGICA DEL MODAL (Asegúrate de tener esto al final) ---
+
+// Función para ABRIR el modal (Mueve el formulario adentro)
+window.openModal = function() {
+    const modal = document.getElementById("modal");
+    const content = document.getElementById("modal-content");
+    const form = document.getElementById("mainForm");
+
+    // Si el formulario existe en la vista de escritorio, lo movemos al modal
+    if(modal && form && content) { 
+        content.appendChild(form); 
+        modal.style.display = "flex"; 
+    }
+};
+
+// Función para CERRAR el modal (Devuelve el formulario a su sitio original)
+window.closeModal = function() {
+    const modal = document.getElementById("modal");
+    const form = document.getElementById("mainForm");
+    const desktopContainer = document.querySelector(".cta-form-container");
+
+    if(modal) modal.style.display = "none";
+    
+    // Devolvemos el formulario a la columna derecha (Desktop)
+    if(desktopContainer && form) {
+        desktopContainer.appendChild(form);
+    }
+};
+
+// --- 8. REFUERZO PARA EL BOTÓN MÓVIL ---
+// A veces el onclick del HTML falla, esto fuerza que el botón funcione sí o sí
+const mobileBtn = document.getElementById("mobile-btn");
+if (mobileBtn) {
+    mobileBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation(); // Evita conflictos con el touch del slider
+        window.openModal();
+    });
+}
