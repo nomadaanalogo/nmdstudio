@@ -145,42 +145,54 @@ window.addEventListener('resize', () => {
     });
 });
 
-// --- 6. FORMULARIOS (CORREGIDO) ---
+// --- 6. FORMULARIOS (Igual que antes) ---
 const mainForm = document.getElementById("mainForm");
 if(mainForm) {
     mainForm.addEventListener("submit", async (e) => {
         e.preventDefault();
         const btn = e.target.querySelector("button");
         const originalText = btn.innerHTML;
-        
-        // Feedback visual inmediato
         btn.innerHTML = 'ENVIANDO...';
         btn.disabled = true;
 
         const fd = new FormData(e.target);
         const data = Object.fromEntries(fd);
 
-        // 1. Enviamos datos a Google Sheets (sin esperar respuesta para no bloquear)
         fetch(GOOGLE_URL, { 
             method: "POST", mode: "no-cors", 
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(data) 
         }).catch(console.error);
 
-        // 2. Preparamos el mensaje
-        const msg = `Hola! Me interesa replicar este sistema para mi negocio.%0A*Nombre:* ${data.name}`;
-        const waLink = `https://wa.me/573154483584?text=${msg}`;
-
-        // 3. SOLUCIÓN: Redirección INMEDIATA (Sin setTimeout)
-        // Usamos location.href para asegurar que abra la App en móviles
-        window.location.href = waLink;
-
-        // 4. Limpieza visual (por si el usuario regresa atrás en el navegador)
+        const msg = `Hola! Me interesa la promo Landing Page.%0A*Nombre:* ${data.name}`;
         setTimeout(() => {
+            window.open(`https://wa.me/573154483584?text=${msg}`, "_blank");
             btn.innerHTML = originalText;
             btn.disabled = false;
             e.target.reset();
             closeModal();
-        }, 500); 
+        }, 1000);
     });
 }
+
+window.openModal = function() {
+    const modal = document.getElementById("modal");
+    const content = document.getElementById("modal-content");
+    const form = document.getElementById("mainForm");
+    if(modal && form) { modal.style.display = "flex"; content.appendChild(form); }
+}
+
+window.closeModal = function() {
+    const modal = document.getElementById("modal");
+    const form = document.getElementById("mainForm");
+    const desktopContainer = document.querySelector(".cta-form-container");
+    if(modal) modal.style.display = "none";
+    if(desktopContainer && form) desktopContainer.appendChild(form);
+}
+
+// Forzar actualización al cargar por si el navegador se duerme
+window.addEventListener('load', () => {
+    updateUI();
+    // Un segundo chequeo por si las imágenes cambian el tamaño
+    setTimeout(updateUI, 100);
+});
