@@ -146,27 +146,38 @@ window.addEventListener('resize', () => {
 });
 
 // --- 6. FORMULARIOS (Igual que antes) ---
+// --- 6. FORMULARIOS (CORREGIDO PARA GARANTIZAR ENVÍO) ---
 const mainForm = document.getElementById("mainForm");
 if(mainForm) {
-    mainForm.addEventListener("submit", async (e) => {
+    mainForm.addEventListener("submit", (e) => { // Quitamos 'async' porque no vamos a pausar
         e.preventDefault();
+        
         const btn = e.target.querySelector("button");
         const originalText = btn.innerHTML;
-        btn.innerHTML = 'ENVIANDO...';
+        
+        btn.innerHTML = 'ABRIENDO WHATSAPP...';
         btn.disabled = true;
 
         const fd = new FormData(e.target);
         const data = Object.fromEntries(fd);
 
+        // 1. FETCH CON KEEPALIVE
+        // Esto le dice al navegador: "Envía esto sí o sí, aunque yo me vaya de la página"
         fetch(GOOGLE_URL, { 
-            method: "POST", mode: "no-cors", 
+            method: "POST", 
+            mode: "no-cors", 
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(data) 
+            body: JSON.stringify(data),
+            keepalive: true  // <--- ESTA ES LA CLAVE MÁGICA
         }).catch(console.error);
 
+        // 2. REDIRECCIÓN INMEDIATA
+        // Al no haber 'await' ni 'setTimeout', el móvil permite abrir la app
         const msg = `Hola! Me interesa la promo Landing Page.%0A*Nombre:* ${data.name}`;
+        window.location.href = `https://wa.me/573154483584?text=${msg}`;
+
+        // 3. Limpieza visual (por si el usuario vuelve atrás)
         setTimeout(() => {
-            window.open(`https://wa.me/573154483584?text=${msg}`, "_blank");
             btn.innerHTML = originalText;
             btn.disabled = false;
             e.target.reset();
@@ -174,25 +185,3 @@ if(mainForm) {
         }, 1000);
     });
 }
-
-window.openModal = function() {
-    const modal = document.getElementById("modal");
-    const content = document.getElementById("modal-content");
-    const form = document.getElementById("mainForm");
-    if(modal && form) { modal.style.display = "flex"; content.appendChild(form); }
-}
-
-window.closeModal = function() {
-    const modal = document.getElementById("modal");
-    const form = document.getElementById("mainForm");
-    const desktopContainer = document.querySelector(".cta-form-container");
-    if(modal) modal.style.display = "none";
-    if(desktopContainer && form) desktopContainer.appendChild(form);
-}
-
-// Forzar actualización al cargar por si el navegador se duerme
-window.addEventListener('load', () => {
-    updateUI();
-    // Un segundo chequeo por si las imágenes cambian el tamaño
-    setTimeout(updateUI, 100);
-});
