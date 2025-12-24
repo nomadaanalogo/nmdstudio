@@ -13,23 +13,42 @@ let wheelAccumulator = 0;       // Aquí acumulamos la intención de scroll
 const WHEEL_THRESHOLD = 80;     // Cuánto hay que scrollear para que la página reaccione (Ajustable)
 let accumulatorResetTimer = null; // Para limpiar el acumulador si el usuario se detiene
 
-// --- 1. SINCRONIZACIÓN VISUAL (Barra y Clases) ---
+
+// ... (Tus variables iniciales siguen igual) ...
+
+// --- NUEVAS VARIABLES PARA DOTS ---
+const dotsContainer = document.getElementById("dots-container");
+const arrowBtn = document.querySelector(".hero-arrow-indicator");
+
+// --- 0. INICIALIZACIÓN (CREAR DOTS & EVENTO FLECHA) ---
+function init() {
+    // 1. Crear un dot por cada sección
+    sections.forEach((_, index) => {
+        const dot = document.createElement("div");
+        dot.classList.add("dot");
+        // Si tocan un dot, vamos a esa sección
+        dot.addEventListener("click", () => goToSection(index));
+        dotsContainer.appendChild(dot);
+    });
+
+    // 2. Activar la flecha de la primera pantalla
+    if (arrowBtn) {
+        arrowBtn.style.cursor = "pointer";
+        arrowBtn.addEventListener("click", () => {
+            goToSection(1); // Mover a la segunda pantalla (índice 1)
+        });
+    }
+}
+init(); // Ejecutamos al cargar
+
+// --- 1. SINCRONIZACIÓN VISUAL (ACTUALIZADO) ---
 const updateUI = () => {
-    // Si estamos en animación controlada (bloqueados), NO actualizamos el índice
-    // leyendo el DOM. Confiamos en nuestra variable 'currentIndex'.
-    // Esto evita que si scrolleas rápido mientras se mueve, calcule mal la posición.
     if (!isLocked) {
+        // Calculamos índice actual
         currentIndex = Math.round(scroller.scrollLeft / window.innerWidth);
     }
 
-    // Barra de progreso
-    const maxScroll = scroller.scrollWidth - scroller.clientWidth;
-    if (maxScroll > 0) {
-        const progress = (scroller.scrollLeft / maxScroll) * 100;
-        if(progressBar) progressBar.style.width = `${progress}%`;
-    }
-
-    // Clases Activas
+    // A. Actualizar Clases de Secciones
     sections.forEach((sec, index) => {
         if(index === currentIndex) {
             sec.classList.add("active-section");
@@ -37,9 +56,20 @@ const updateUI = () => {
             sec.classList.remove("active-section");
         }
     });
+
+    // B. Actualizar Dots (Estilo Instagram)
+    const dots = document.querySelectorAll(".dot");
+    dots.forEach((dot, index) => {
+        if (index === currentIndex) {
+            dot.classList.add("active");
+        } else {
+            dot.classList.remove("active");
+        }
+    });
 };
 
 scroller.addEventListener("scroll", () => window.requestAnimationFrame(updateUI));
+
 
 // --- 2. FUNCIÓN DE MOVIMIENTO ---
 function goToSection(index) {
