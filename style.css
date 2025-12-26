@@ -3,6 +3,7 @@
     --text-main: #ffffff;     
     --text-sub: #d1d1d1;      
     --neon-gradient: linear-gradient(135deg, #03a9f4, #f441a5);
+    --neon-gradient2: linear-gradient(135deg, #f40303, #fa8e00);
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -72,6 +73,10 @@ h1 {
 
 .highlight-text {
     background: var(--neon-gradient); -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent; font-weight: 700;
+}
+.highlight-text2 {
+    background: var(--neon-gradient2); -webkit-background-clip: text;
     -webkit-text-fill-color: transparent; font-weight: 700;
 }
 
