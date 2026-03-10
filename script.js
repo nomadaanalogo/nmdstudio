@@ -261,3 +261,37 @@ if (mobileBtn) {
     });
 }
 
+
+// --- ACTUALIZACIÓN DE NAVBAR ---
+
+// 1. Función para navegar al hacer click
+function navTo(index) {
+    const scroller = document.getElementById("master-canvas"); // Usamos el ID correcto
+    const targetX = window.innerWidth * index;
+    scroller.scrollTo({ left: targetX, behavior: 'smooth' });
+}
+
+// 2. Lógica para iluminar la Navbar
+// Ejecutamos esto dentro de una función o nos aseguramos de que el DOM esté listo
+const syncNavbar = () => {
+    const scroller = document.getElementById("master-canvas");
+    const navItems = document.querySelectorAll('.nav-link-item');
+
+    if (!scroller) return;
+
+    scroller.addEventListener('scroll', () => {
+        // Calculamos el índice basado en el ancho de la pantalla
+        const index = Math.round(scroller.scrollLeft / window.innerWidth);
+        
+        navItems.forEach((item, i) => {
+            if (i === index) {
+                item.classList.add('active'); // Aplica el estilo definido en tu CSS
+            } else {
+                item.classList.remove('active');
+            }
+        });
+    });
+};
+
+// Llamamos a la función
+syncNavbar();

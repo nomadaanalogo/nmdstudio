@@ -129,12 +129,12 @@ h1 {
 
 .price-box { margin: 2rem 0; display: flex; flex-direction: column; gap: 0.5rem; }
 .old-price { text-decoration: line-through; color: #666; font-size: 1rem; }
-.new-price { font-size: clamp(2.5rem, 4vw, 4rem); font-weight: 800; line-height: 1; }
+.new-price { font-size: clamp(2.5rem, 4vw, 2rem); font-weight: 800; line-height: 1; }
 .new-price small { font-size: 0.4em; font-weight: 400; color: #888; }
 .promo-tag { font-size: 0.7rem; color: #d7d7d7; text-transform: uppercase; letter-spacing: 1px; }
 
 .cyan-text { color: #00eeff; font-weight: 700; text-transform: uppercase; font-size: 0.9rem; letter-spacing: 1px; }
-.red-alert { color: #ff4b4b; font-weight: 700; text-transform: uppercase; font-size: 0.9rem; letter-spacing: 1px; margin-top: 10px; display: block; }
+.red-alert { color: #0dfc00; font-weight: 700; text-transform: uppercase; font-size: 0.9rem; letter-spacing: 1px; margin-top: 10px; display: block; }
 .blink { animation: blink 1s infinite; margin-right: 5px; font-size: 8px; vertical-align: middle; }
 @keyframes blink { 50% { opacity: 0; } }
 
@@ -281,7 +281,8 @@ textarea:focus {
 /* --- ESTILOS DE LOS PUNTOS (DOTS) --- */
 .pagination-dots {
     position: fixed;
-    top: 30px; /* Un poco separado del borde */
+    top: auto; /* Un poco separado del borde */
+    bottom: 30px;
     left: 50%;
     transform: translateX(-50%);
     display: flex;
@@ -289,6 +290,9 @@ textarea:focus {
     z-index: 1000;
     pointer-events: none; /* Para que no bloqueen toques cercanos, aunque los dots sí tendrán pointer-events: auto */
 }
+
+
+
 
 .dot {
     width: 8px;
@@ -330,4 +334,96 @@ textarea:focus {
     
     /* Ocultamos la barra vieja por si acaso quedó rastro */
     #progress-container { display: none !important; }
+}
+/* --- NAVBAR ELEGANTE --- */
+.main-nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding: 1.2rem 5%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 2000; /* Por encima de todo */
+    background: rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.nav-logo {
+    font-weight: 900;
+    font-size: 1.1rem;
+    letter-spacing: 2px;
+    color: #fff;
+    text-transform: uppercase;
+}
+
+.nav-logo span {
+    background: var(--neon-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.nav-links {
+    display: flex;
+    gap: 1.5rem;
+    align-items: center;
+}
+
+.nav-links button {
+    background: none;
+    border: none;
+    color: var(--text-sub);
+    font-family: 'Inter', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.nav-links button:hover {
+    color: #fff;
+    text-shadow: 0 0 10px rgba(255,255,255,0.5);
+}
+
+.nav-cta {
+    background: var(--neon-gradient) !important;
+    padding: 10px 20px !important;
+    border-radius: 50px !important;
+    color: #fff !important;
+    box-shadow: 0 4px 15px rgba(244, 65, 165, 0.3);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .nav-links button:not(.nav-cta) {
+        display: none; /* En móvil solo dejamos el botón de acción */
+    }
+    .main-nav {
+        padding: 1rem 5%;
+    }
+}
+
+
+/* Clase que se aplicará dinámicamente */
+.nav-link-item.active {
+    color: #fff !important;
+    text-shadow: 0 0 15px rgba(244, 65, 165, 0.8);
+    position: relative;
+}
+
+/* Una rayita neón debajo del paso activo */
+.nav-link-item.active::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: var(--neon-gradient);
+    border-radius: 10px;
 }
